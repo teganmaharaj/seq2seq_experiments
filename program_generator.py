@@ -1,6 +1,6 @@
 import string
 import io
-from contextlib import redirect_stdout
+#from contextlib import redirect_stdout
 
 from random import choice, random, randint
 from data import encode_sequences, dense_to_one_hot
@@ -22,6 +22,30 @@ COMPARATORS = ('<', '>')
 OPERATORS = ('+', '-')
 VARIABLE_NAMES = list('abcdefgh')
 
+# https://stackoverflow.com/questions/3906232/python-get-the-print-output-in-an-exec-statement
+import sys
+#import StringIO
+import contextlib
+
+@contextlib.contextmanager
+def stdoutIO(stdout=None):
+    old = sys.stdout
+    if stdout is None:
+        stdout = io.BytesIO()#io.StringIO()
+        #stdout = StringIO.StringIO()
+    sys.stdout = stdout
+    yield stdout
+    sys.stdout = old
+
+
+def execute(program):
+    with stdoutIO() as ss:# buf, redirect_stdout(buf):
+        #print (10)
+        exec(program)
+        result = ss.getvalue()
+        print (result)
+        return result
+    
 
 def if_operation(variables, nesting, difficulty):
     compare_variable = choice(list(variables))
@@ -153,12 +177,20 @@ class ProgramGenerator():
         programs = [self.generate_program(hash_mod=0 if validation else 1)
                     for _ in range(self.batch_size)]
 
-        # Execute the programs to get the targets
         results = []
+        # Execute the programs to get the targets
         for program in programs:
-            with io.StringIO() as buf, redirect_stdout(buf):
-                exec(program)
-                results.append(buf.getvalue()[:-1])
+            result = execute(program)
+            results.append(result)
+
+        with open('programs.txt', 'w') as f:
+            for i,program in enumerate(programs):
+                f.write('PROGRAM:\n')
+                f.write(program)
+                f.write('\n')
+                f.write('RESULT:\n')
+                f.write(results[i])
+                f.write('\n\n')
 
         input_sequences = encode_sequences(programs,
                                            symbol_to_idx=SYMBOL_TO_IDX,
@@ -180,3 +212,7 @@ class ProgramGenerator():
                                             num_classes=len(SYMBOL_TO_IDX))
 
         return input_sequences, target_sequences
+
+if 1:
+    p = ProgramGenerator(batch_size=25, program_length=1, num_len=1)
+    p.next_batch()
