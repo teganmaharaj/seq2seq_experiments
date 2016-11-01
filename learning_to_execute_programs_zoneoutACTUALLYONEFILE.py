@@ -183,6 +183,8 @@ class Seq2SeqProgramModel:
                  num_input_symbols=20,
                  num_output_symbols=20,
                  batch_size=32,
+                 zoneout_c_keep_prob=0,
+                 zoneout_h_keep_prob=0,
                  go_symbol_idx=0,
                  symbols=None,
                  scope='seq2seq_model'):
@@ -203,6 +205,8 @@ class Seq2SeqProgramModel:
                                                num_input_symbols=num_input_symbols,
                                                num_output_symbols=num_output_symbols,
                                                batch_size=batch_size,
+                                               zoneout_c_keep_prob=zoneout_c_keep_prob,
+                                               zoneout_h_keep_prob=zoneout_h_keep_prob,
                                                is_training=True)
 
         with tf.variable_scope(scope, reuse=True):
@@ -213,6 +217,8 @@ class Seq2SeqProgramModel:
                                               num_input_symbols=num_input_symbols,
                                               num_output_symbols=num_output_symbols,
                                               batch_size=batch_size,
+                                              zoneout_c_keep_prob=zoneout_c_keep_prob,
+                                              zoneout_h_keep_prob=zoneout_h_keep_prob,
                                               is_training=False)
 
     def set_learning_rate(self, learning_rate):
